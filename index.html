@@ -6,7 +6,20 @@
   <title>Codewars leaderboard</title>
 </head>
 <body>
-  
+  <form id="username-form">
+    <label for="username-input">Usernames</label>
+    <input
+      id="username-input"
+      name="usernames"
+      type="text"
+      placeholder="CodeYourFuture,40thieves,SallyMcGrath"
+      required
+    >
+    <button type="submit">Submit</button>
+  </form>
+
+  <p id="username-error" role="alert" aria-live="polite"></p>
+  <ul id="username-list"></ul>
 </body>
 
 <script src="index.mjs" type="module"></script>

@@ -10,7 +10,14 @@
 import test from "node:test";
 import assert from "node:assert";
 import nock from "nock";
-import { makeFetchRequest } from "./index.mjs";
+import {
+  getSubmittedUsernames,
+  isValidUsername,
+  makeFetchRequest,
+  parseUsernames,
+  resetSubmittedUsernames,
+  submitUsernames,
+} from "./index.mjs";
 
 test("mocks a fetch function", async () => {
   // Create a fetch request "mock" using the nock library, which "replaces"
@@ -30,4 +37,36 @@ test("mocks a fetch function", async () => {
   // helps ensure that you're not making real fetch requests that don't match
   // the nock configuration.
   assert(scope.isDone() === true, "No matching fetch request has been made");
+});
+
+test("validates usernames with letters, numbers and hyphens", () => {
+  assert.strictEqual(isValidUsername("abc-123"), true);
+  assert.strictEqual(isValidUsername("abc_123"), false);
+  assert.strictEqual(isValidUsername("abc!"), false);
+});
+
+test("parses comma separated usernames", () => {
+  const result = parseUsernames("alpha, beta-2, gamma");
+
+  assert.deepStrictEqual(result.usernames, ["alpha", "beta-2", "gamma"]);
+  assert.deepStrictEqual(result.invalidUsernames, []);
+});
+
+test("stores submitted usernames when all are valid", () => {
+  resetSubmittedUsernames();
+
+  const result = submitUsernames("alpha,beta-2");
+
+  assert.strictEqual(result.success, true);
+  assert.deepStrictEqual(getSubmittedUsernames(), ["alpha", "beta-2"]);
+});
+
+test("does not store usernames when any are invalid", () => {
+  resetSubmittedUsernames();
+
+  const result = submitUsernames("alpha,beta_2");
+
+  assert.strictEqual(result.success, false);
+  assert.deepStrictEqual(result.invalidUsernames, ["beta_2"]);
+  assert.deepStrictEqual(getSubmittedUsernames(), []);
 });
