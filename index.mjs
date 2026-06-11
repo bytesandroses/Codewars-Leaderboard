@@ -1,10 +1,5 @@
 export function makeFetchRequest(username) {
-  try {
-    return fetch(`https://www.codewars.com/api/v1/users/${username}`);
-  } catch (error) {
-    console.error("Fetch request failed:", error);
-    throw error;
-  }
+  return fetch(`https://www.codewars.com/api/v1/users/${username}`);
 }
 
 export function parseUsernames(usernames) {
@@ -24,83 +19,73 @@ function handleUsernameFormSubmit(event) {
   const parsedUsernames = parseUsernames(usernames);
 
   const errorContainer = document.getElementById("error-message");
-  if (errorContainer) {
-    errorContainer.textContent = "";
-    errorContainer.style.display = "none";
-  }
+  errorContainer.textContent = "";
+  errorContainer.style.display = "none";
 
   if (!parsedUsernames.length) {
-    if (errorContainer) {
-      errorContainer.textContent =
-        "Please enter at least one valid username (> 3 characters).";
-      errorContainer.style.display = "block";
-    }
+    errorContainer.textContent = "Please enter at least one valid username.";
+    errorContainer.style.display = "block";
     return;
   }
 
   const fetchPromises = parsedUsernames.map((username) =>
-    makeFetchRequest(username).catch((err) => {
+    makeFetchRequest(username).catch(() => {
       return { _networkError: true, username: username };
     }),
   );
 
   Promise.all(fetchPromises)
-    .then((responses) => {
+    .then(async (responses) => {
       const failedUsers = [];
+      const userDataArray = [];
 
-      return Promise.all(
-        responses.map(async (response) => {
-          if (response && response._networkError) {
-            failedUsers.push(
-              `Failed to fetch "${response.username}". Check your internet connection.`,
-            );
-            return null;
-          }
-
-          if (response.ok) {
-            return await response.json();
-          } else {
-            const urlParts = response.url.split("/");
-            const failedName = urlParts[urlParts.length - 1] || "Unknown User";
-            failedUsers.push(`User "${failedName}" not found (404).`);
-            return null;
-          }
-        }),
-      ).then((userDataArray) => {
-        if (failedUsers.length > 0 && errorContainer) {
-          errorContainer.textContent = failedUsers.join(" ");
-          errorContainer.style.display = "block";
+      for (const response of responses) {
+        if (response._networkError) {
+          failedUsers.push(
+            `Failed to fetch "${response.username}". Check your internet connection.`,
+          );
+          continue;
         }
-        return userDataArray;
-      });
+
+        if (response.ok) {
+          const data = await response.json();
+          userDataArray.push(data);
+        } else {
+          const urlParts = response.url.split("/");
+          const failedName = urlParts[urlParts.length - 1] || "Unknown User";
+          failedUsers.push(`User "${failedName}" not found (404).`);
+        }
+      }
+
+      if (failedUsers.length > 0) {
+        errorContainer.textContent = failedUsers.join(" ");
+        errorContainer.style.display = "block";
+      }
+
+      return userDataArray;
     })
-    .then((userDataArray) => {
-      const validUsers = userDataArray.filter((user) => user !== null);
+    .then((validUsers) => {
       populateLanguageOptions(validUsers);
       renderLeaderboard(validUsers, "overall");
 
       const select = document.getElementById("language-select");
-      if (select) {
-        const newSelect = select.cloneNode(true);
-        select.parentNode.replaceChild(newSelect, select);
+      const newSelect = select.cloneNode(true);
+      select.parentNode.replaceChild(newSelect, select);
 
-        newSelect.addEventListener("change", (event) => {
-          const selectedValue = event.target.value;
-          if (selectedValue === "overall") {
-            renderLeaderboard(validUsers, "overall");
-          } else {
-            renderLeaderboard(validUsers, "language", selectedValue);
-          }
-        });
-      }
+      newSelect.addEventListener("change", (event) => {
+        const selectedValue = event.target.value;
+        if (selectedValue === "overall") {
+          renderLeaderboard(validUsers, "overall");
+        } else {
+          renderLeaderboard(validUsers, "language", selectedValue);
+        }
+      });
     });
 }
 
 function setupFormListener() {
   const form = document.getElementById("usernames-form");
-  if (form) {
-    form.addEventListener("submit", handleUsernameFormSubmit);
-  }
+  form.addEventListener("submit", handleUsernameFormSubmit);
 }
 
 export function getScore(user, rankingType, language = null) {
@@ -116,7 +101,6 @@ export function getScore(user, rankingType, language = null) {
 
 export function renderLeaderboard(users, rankingType, language = null) {
   const tbody = document.getElementById("leaderboard-body");
-  if (!tbody) return;
   tbody.innerHTML = "";
 
   let displayUsers = [...users];
@@ -126,37 +110,35 @@ export function renderLeaderboard(users, rankingType, language = null) {
     );
   }
 
-  const sortedUsers = [...displayUsers].sort((a, b) => {
+  displayUsers.sort((a, b) => {
     const scoreA = getScore(a, rankingType, language);
     const scoreB = getScore(b, rankingType, language);
     return scoreB - scoreA;
   });
 
-  sortedUsers.forEach((user, index) => {
+  displayUsers.forEach((user, index) => {
     const userRow = document.createElement("tr");
     const usernameCell = document.createElement("td");
-    const pointsCell = document.createElement("td");
     const clanCell = document.createElement("td");
+    const pointsCell = document.createElement("td");
 
     usernameCell.textContent = user.username;
-    pointsCell.textContent = getScore(user, rankingType, language);
     clanCell.textContent = user.clan || "N/A";
+    pointsCell.textContent = getScore(user, rankingType, language);
 
     if (index === 0) {
-      pointsCell.classList.add("leaderboard-top");
+      userRow.classList.add("leaderboard-top");
     }
 
     userRow.appendChild(usernameCell);
-    userRow.appendChild(pointsCell);
     userRow.appendChild(clanCell);
+    userRow.appendChild(pointsCell);
     tbody.appendChild(userRow);
   });
 }
 
 function populateLanguageOptions(users) {
   const select = document.getElementById("language-select");
-  if (!select) return;
-
   select.innerHTML = "";
 
   const overallOption = document.createElement("option");
@@ -183,6 +165,8 @@ function populateLanguageOptions(users) {
   select.disabled = false;
 }
 
-window.onload = function () {
-  setupFormListener();
-};
+if (typeof window !== "undefined") {
+  window.onload = function () {
+    setupFormListener();
+  };
+}

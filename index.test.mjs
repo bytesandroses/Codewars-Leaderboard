@@ -9,7 +9,13 @@ test("mocks a fetch function successfully", async () => {
     .reply(200, { username: "testuser", ranks: { overall: { score: 100 } } });
 
   const response = await makeFetchRequest("testuser");
-  assert.strictEqual(response.username, "testuser");
+
+  assert.strictEqual(response.ok, true);
+  assert.strictEqual(response.status, 200);
+
+  const data = await response.json();
+  assert.strictEqual(data.username, "testuser");
+  assert.strictEqual(data.ranks.overall.score, 100);
   assert.strictEqual(scope.isDone(), true);
 });
 
