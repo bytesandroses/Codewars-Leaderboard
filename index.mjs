@@ -1,12 +1,17 @@
-export function makeFetchRequest() {
-  return fetch("https://example.com/test");
+export function makeFetchRequest(username) {
+  try {
+    return fetch(`https://www.codewars.com/api/v1/users/${username}`);
+  } catch (error) {
+    console.error("Fetch request failed:", error);
+    throw error;
+  }
 }
 
 export function parseUsernames(usernames) {
   const usernameArray = usernames
     .split(",")
     .map((username) => username.trim().toLowerCase())
-    .filter((username) => username.length > 4);
+    .filter((username) => username.length > 3);
 
   return [...new Set(usernameArray)];
 }

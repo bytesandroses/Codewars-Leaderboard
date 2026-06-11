@@ -15,16 +15,19 @@
       <h1>Codewars Leaderboard</h1>
     </header>
     <main>
-      <section id="username-input">
-        <label for="username">Enter Codewars usernames:</label>
-        <textarea
-          id="username"
-          name="username"
-          rows="4"
-          cols="50"
-          placeholder="For example: CodeYourFuture, 40thieves, SallyMcGrath"
-        ></textarea>
-        <button id="submit-btn">Submit</button>
+      <section id="usernames-input">
+        <form id="usernames-form">
+          <label for="usernames">Enter Codewars usernames:</label>
+          <textarea
+            id="usernames"
+            name="usernames"
+            rows="4"
+            cols="50"
+            placeholder="For example: CodeYourFuture, 40thieves, SallyMcGrath"
+          >
+          </textarea>
+          <button type="submit" id="usernames-btn">Submit</button>
+        </form>
       </section>
 
       <section id="language-filter"></section>
