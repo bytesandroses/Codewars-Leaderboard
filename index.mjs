@@ -10,7 +10,7 @@ export function makeFetchRequest(username) {
 export function parseUsernames(usernames) {
   const usernameArray = usernames
     .split(",")
-    .map((username) => username.trim().toLowerCase())
+    .map((username) => username.trim())
     .filter((username) => username.length > 3);
 
   return [...new Set(usernameArray)];
@@ -23,7 +23,27 @@ function handleUsernameFormSubmit(event) {
   const usernames = textarea.value;
   const parsedUsernames = parseUsernames(usernames);
 
-  console.log("Parsed Usernames:", parsedUsernames);
+  const fetchPromises = parsedUsernames.map((username) =>
+    makeFetchRequest(username),
+  );
+
+  Promise.all(fetchPromises)
+    .then((responses) => {
+      return Promise.all(
+        responses.map(async (response) => {
+          if (response.ok) {
+            return await response.json();
+          } else {
+            console.log(`User not found: ${response.url}`);
+            return null;
+          }
+        }),
+      );
+    })
+    .then((userDataArray) => {
+      const validUsers = userDataArray.filter((user) => user !== null);
+      console.log("Valid users:", validUsers);
+    });
 }
 
 function setupFormListener() {
