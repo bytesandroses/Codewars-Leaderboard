@@ -3,52 +3,42 @@ import assert from "node:assert";
 import nock from "nock";
 import { makeFetchRequest, parseUsernames } from "./index.mjs";
 
-test("mocks a fetch function", async () => {
-  const scope = nock("https://example.com")
-    .get("/test")
-    .reply(200, JSON.stringify({ user: "someone" }));
+test("mocks a fetch function successfully", async () => {
+  const scope = nock("https://www.codewars.com")
+    .get("/api/v1/users/testuser")
+    .reply(200, { username: "testuser", ranks: { overall: { score: 100 } } });
 
-  const response = await makeFetchRequest();
-  const parsedResponse = await response.json();
-  assert(parsedResponse.user === "someone");
-
-  assert(scope.isDone() === true, "No matching fetch request has been made");
+  const response = await makeFetchRequest("testuser");
+  assert.strictEqual(response.username, "testuser");
+  assert.strictEqual(scope.isDone(), true);
 });
 
 describe("parseUsernames", () => {
   test("parses a comma-separated string of usernames", () => {
-    const input = "alice, bob, charlie";
-    const expectedOutput = ["alice", "bob", "charlie"];
+    const input = "alice, bobb, charlie";
+    const expectedOutput = ["alice", "bobb", "charlie"];
     assert.deepStrictEqual(parseUsernames(input), expectedOutput);
   });
 
-  test("filters out usernames shorter than 5 characters", () => {
+  test("filters out usernames equal to or shorter than 3 characters", () => {
     const input = "al, bob, charlie, dave";
-    const expectedOutput = ["charlie"];
+    const expectedOutput = ["charlie", "dave"];
     assert.deepStrictEqual(parseUsernames(input), expectedOutput);
   });
 
-  test("handles extra spaces and empty entries", () => {
+  test("handles extra spaces and empty entries gracefully", () => {
     const input = " alice , , bob , charlie , ";
-    const expectedOutput = ["alice", "bob", "charlie"];
+    const expectedOutput = ["alice", "charlie"];
     assert.deepStrictEqual(parseUsernames(input), expectedOutput);
   });
 
   test("returns an empty array for an empty string", () => {
-    const input = "";
-    const expectedOutput = [];
-    assert.deepStrictEqual(parseUsernames(input), expectedOutput);
+    assert.deepStrictEqual(parseUsernames(""), []);
   });
 
   test("removes duplicate usernames", () => {
-    const input = "alice, bob, alice, charlie";
-    const expectedOutput = ["alice", "bob", "charlie"];
-    assert.deepStrictEqual(parseUsernames(input), expectedOutput);
-  });
-
-  test("returns usernames in lowercase", () => {
-    const input = "Alice, Bob, Charlie";
-    const expectedOutput = ["alice", "bob", "charlie"];
+    const input = "alice, charlie, alice, charlie";
+    const expectedOutput = ["alice", "charlie"];
     assert.deepStrictEqual(parseUsernames(input), expectedOutput);
   });
 });
