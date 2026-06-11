@@ -1,0 +1,40 @@
+body {
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: #212529;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+#error-message {
+  color: #842029;
+  background-color: #f8d7da;
+  border: 1px solid #f5c2c7;
+  padding: 12px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+  display: none;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+th,
+td {
+  padding: 10px;
+  border: 1px solid #dee2e6;
+  text-align: left;
+}
+
+th {
+  background-color: #f8f9fa;
+}
+
+.leaderboard-top {
+  background-color: #fff3cd;
+  color: #664d03;
+}

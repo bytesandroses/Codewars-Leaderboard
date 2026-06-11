@@ -1,13 +1,73 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Codewars leaderboard</title>
-</head>
-<body>
-  
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="A leaderboard for Codewars users, tracking overall and per-language ranks."
+    />
+    <title>Codewars Leaderboard</title>
+    <script src="index.mjs" type="module" defer></script>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Codewars Leaderboard</h1>
+    </header>
+    <main>
+      <div id="error-message" role="alert" aria-live="polite"></div>
 
-<script src="index.mjs" type="module"></script>
+      <section id="usernames-input">
+        <form id="usernames-form">
+          <label for="usernames"
+            >Enter Codewars usernames (comma-separated):</label
+          >
+          <textarea
+            id="usernames"
+            name="usernames"
+            rows="4"
+            cols="50"
+            placeholder="For example: CodeYourFuture, 40thieves, SallyMcGrath"
+            required
+          ></textarea>
+          <button type="submit" id="usernames-btn">Submit</button>
+        </form>
+      </section>
+
+      <section id="language-filter">
+        <label for="language-select">Filter by programming language:</label>
+        <select id="language-select" disabled>
+          <option value="overall">Overall</option>
+        </select>
+      </section>
+
+      <section id="leaderboard">
+        <table>
+          <caption>
+            Current Standings
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Username</th>
+              <th scope="col">Clan</th>
+              <th scope="col">Score</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboard-body"></tbody>
+        </table>
+      </section>
+    </main>
+    <footer>
+      <p>
+        Data provided by
+        <a
+          href="https://dev.codewars.com/#get-user"
+          rel="noopener"
+          target="_blank"
+          >Codewars</a
+        >
+      </p>
+    </footer>
+  </body>
 </html>
