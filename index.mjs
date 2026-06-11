@@ -128,6 +128,7 @@ export function renderLeaderboard(users, rankingType, language = null) {
 
     if (index === 0) {
       userRow.classList.add("leaderboard-top");
+      pointsCell.style.fontWeight = "bold";
     }
 
     userRow.appendChild(usernameCell);
