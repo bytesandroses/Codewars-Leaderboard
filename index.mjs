@@ -6,7 +6,7 @@ export function parseUsernames(usernames) {
   const usernameArray = usernames
     .split(",")
     .map((username) => username.trim())
-    .filter((username) => username.length > 3);
+    .filter((username) => username.length > 0);
 
   return [...new Set(usernameArray)];
 }
@@ -99,6 +99,14 @@ export function getScore(user, rankingType, language = null) {
   return 0;
 }
 
+export function sortUsersByScore(users, rankingType, language = null) {
+  return [...users].sort((a, b) => {
+    const scoreA = getScore(a, rankingType, language);
+    const scoreB = getScore(b, rankingType, language);
+    return scoreB - scoreA;
+  });
+}
+
 export function renderLeaderboard(users, rankingType, language = null) {
   const tbody = document.getElementById("leaderboard-body");
   tbody.innerHTML = "";
@@ -110,13 +118,9 @@ export function renderLeaderboard(users, rankingType, language = null) {
     );
   }
 
-  displayUsers.sort((a, b) => {
-    const scoreA = getScore(a, rankingType, language);
-    const scoreB = getScore(b, rankingType, language);
-    return scoreB - scoreA;
-  });
+  const sortedUsers = sortUsersByScore(displayUsers, rankingType, language);
 
-  displayUsers.forEach((user, index) => {
+  sortedUsers.forEach((user, index) => {
     const userRow = document.createElement("tr");
     const usernameCell = document.createElement("td");
     const clanCell = document.createElement("td");
@@ -128,7 +132,6 @@ export function renderLeaderboard(users, rankingType, language = null) {
 
     if (index === 0) {
       userRow.classList.add("leaderboard-top");
-      pointsCell.style.fontWeight = "bold";
     }
 
     userRow.appendChild(usernameCell);

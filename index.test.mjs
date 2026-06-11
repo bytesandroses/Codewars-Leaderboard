@@ -1,7 +1,12 @@
 import { describe, test } from "node:test";
 import assert from "node:assert";
 import nock from "nock";
-import { makeFetchRequest, parseUsernames } from "./index.mjs";
+import {
+  makeFetchRequest,
+  parseUsernames,
+  getScore,
+  sortUsersByScore,
+} from "./index.mjs";
 
 test("mocks a fetch function successfully", async () => {
   const scope = nock("https://www.codewars.com")
@@ -26,15 +31,15 @@ describe("parseUsernames", () => {
     assert.deepStrictEqual(parseUsernames(input), expectedOutput);
   });
 
-  test("filters out usernames equal to or shorter than 3 characters", () => {
-    const input = "al, bob, charlie, dave";
-    const expectedOutput = ["charlie", "dave"];
+  test("filters out empty entries", () => {
+    const input = "alice, , bob, charlie, ";
+    const expectedOutput = ["alice", "bob", "charlie"];
     assert.deepStrictEqual(parseUsernames(input), expectedOutput);
   });
 
-  test("handles extra spaces and empty entries gracefully", () => {
-    const input = " alice , , bob , charlie , ";
-    const expectedOutput = ["alice", "charlie"];
+  test("handles extra spaces around usernames", () => {
+    const input = " alice , bob , charlie ";
+    const expectedOutput = ["alice", "bob", "charlie"];
     assert.deepStrictEqual(parseUsernames(input), expectedOutput);
   });
 
@@ -46,5 +51,107 @@ describe("parseUsernames", () => {
     const input = "alice, charlie, alice, charlie";
     const expectedOutput = ["alice", "charlie"];
     assert.deepStrictEqual(parseUsernames(input), expectedOutput);
+  });
+});
+
+describe("getScore", () => {
+  test("returns overall score", () => {
+    const user = {
+      username: "alice",
+      ranks: { overall: { score: 500 } },
+    };
+    assert.strictEqual(getScore(user, "overall"), 500);
+  });
+
+  test("returns language score when language exists", () => {
+    const user = {
+      username: "alice",
+      ranks: {
+        overall: { score: 500 },
+        languages: { javascript: { score: 750 } },
+      },
+    };
+    assert.strictEqual(getScore(user, "language", "javascript"), 750);
+  });
+
+  test("returns 0 when language does not exist", () => {
+    const user = {
+      username: "alice",
+      ranks: {
+        overall: { score: 500 },
+        languages: { python: { score: 300 } },
+      },
+    };
+    assert.strictEqual(getScore(user, "language", "javascript"), 0);
+  });
+
+  test("returns 0 when ranks are missing", () => {
+    const user = { username: "alice" };
+    assert.strictEqual(getScore(user, "overall"), 0);
+  });
+});
+
+describe("sortUsersByScore", () => {
+  test("sorts users from highest to lowest score", () => {
+    const users = [
+      { username: "charlie", ranks: { overall: { score: 100 } } },
+      { username: "alice", ranks: { overall: { score: 500 } } },
+      { username: "bob", ranks: { overall: { score: 300 } } },
+    ];
+
+    const sorted = sortUsersByScore(users, "overall");
+
+    assert.deepStrictEqual(
+      sorted.map((u) => u.username),
+      ["alice", "bob", "charlie"],
+    );
+  });
+
+  test("sorts by language score when specified", () => {
+    const users = [
+      {
+        username: "charlie",
+        ranks: {
+          overall: { score: 100 },
+          languages: { javascript: { score: 900 } },
+        },
+      },
+      {
+        username: "alice",
+        ranks: {
+          overall: { score: 500 },
+          languages: { javascript: { score: 200 } },
+        },
+      },
+      {
+        username: "bob",
+        ranks: {
+          overall: { score: 300 },
+          languages: { javascript: { score: 500 } },
+        },
+      },
+    ];
+
+    const sorted = sortUsersByScore(users, "language", "javascript");
+
+    assert.deepStrictEqual(
+      sorted.map((u) => u.username),
+      ["charlie", "bob", "alice"],
+    );
+  });
+
+  test("does not mutate original array", () => {
+    const users = [
+      { username: "bob", ranks: { overall: { score: 200 } } },
+      { username: "alice", ranks: { overall: { score: 500 } } },
+    ];
+
+    const originalOrder = users.map((u) => u.username);
+    sortUsersByScore(users, "overall");
+
+    assert.deepStrictEqual(
+      users.map((u) => u.username),
+      originalOrder,
+    );
   });
 });
