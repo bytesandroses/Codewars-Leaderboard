@@ -22,6 +22,12 @@ describe("parseUsernames", () => {
     assert.deepStrictEqual(parseUsernames(input), expectedOutput);
   });
 
+  test("filters out usernames shorter than 5 characters", () => {
+    const input = "al, bob, charlie, dave";
+    const expectedOutput = ["charlie"];
+    assert.deepStrictEqual(parseUsernames(input), expectedOutput);
+  });
+
   test("handles extra spaces and empty entries", () => {
     const input = " alice , , bob , charlie , ";
     const expectedOutput = ["alice", "bob", "charlie"];
@@ -36,6 +42,12 @@ describe("parseUsernames", () => {
 
   test("removes duplicate usernames", () => {
     const input = "alice, bob, alice, charlie";
+    const expectedOutput = ["alice", "bob", "charlie"];
+    assert.deepStrictEqual(parseUsernames(input), expectedOutput);
+  });
+
+  test("returns usernames in lowercase", () => {
+    const input = "Alice, Bob, Charlie";
     const expectedOutput = ["alice", "bob", "charlie"];
     assert.deepStrictEqual(parseUsernames(input), expectedOutput);
   });

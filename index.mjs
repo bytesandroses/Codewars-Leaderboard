@@ -5,8 +5,8 @@ export function makeFetchRequest() {
 export function parseUsernames(usernames) {
   const usernameArray = usernames
     .split(",")
-    .map((username) => username.trim())
-    .filter((username) => username.length > 0);
+    .map((username) => username.trim().toLowerCase())
+    .filter((username) => username.length > 4);
 
   return [...new Set(usernameArray)];
 }
