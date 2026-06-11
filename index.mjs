@@ -10,3 +10,24 @@ export function parseUsernames(usernames) {
 
   return [...new Set(usernameArray)];
 }
+
+function handleUsernameFormSubmit(event) {
+  event.preventDefault();
+
+  const textarea = document.getElementById("usernames");
+  const usernames = textarea.value;
+  const parsedUsernames = parseUsernames(usernames);
+
+  console.log("Parsed Usernames:", parsedUsernames);
+}
+
+function setupFormListener() {
+  const form = document.getElementById("usernames-form");
+  if (form) {
+    form.addEventListener("submit", handleUsernameFormSubmit);
+  }
+}
+
+window.onload = function () {
+  setupFormListener();
+};
